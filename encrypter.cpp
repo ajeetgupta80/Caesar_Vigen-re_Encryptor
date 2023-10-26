@@ -25,8 +25,9 @@ typedef unsigned long long ull;
 class CYPHER{
     private:
     int SIZE;
-    
+
     public:
+        
     void Caesor(char key, std::ifstream &inputFile, std::ofstream &outputFile, bool encrypt);
 
 };
