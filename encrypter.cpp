@@ -7,6 +7,7 @@ LISTEN: dont compile with gcc but with g++
 #include<stdio.h>
 #include<fstream>
 #include<string>
+#include<cstring>
 #include<random>
 #include<cstdlib>
 #include<cstdio> 
@@ -29,6 +30,7 @@ class CYPHER{
     public:
         
     void Caesor(char key, std::ifstream &inputFile, std::ofstream &outputFile, bool encrypt);
+    void Vigenere(std::string keyFileName, std::ifstream &inputFile, std::ofstream &outputFile, bool encrypt);
 
 };
 
@@ -57,8 +59,62 @@ void CYPHER :: Caesor (char key, std::ifstream &inputFile, std::ofstream &output
 
 }
 
+void CYPHER:: Vigenere( std::string keyFileName, std::ifstream &inputFile, std::ofstream &outputFile, bool encrypt){
+       unsigned long long keyseed = 0;
+       bool USE_GENERATOR = false;
+       
+       std::ifstream keyFile;
+       keyFile.open(keyFileName.c_str(), std::ios::binary);
+
+       if(keyFile.fail()){
+          
+          keyseed = strtoull(keyFileName.c_str(), NULL, 10);
+
+          if(keyseed == 0){
+            std::cerr << "cannot open keyfile: " << keyFileName << std::nline;
+            std::cerr << "Enter a valid keyfile or a valid number" << std::nline;
+            return;  
+          }
+
+          USE_GENERATOR = true;
+       }
+
+
+       std::mt19937 key(keyseed);
+
+       uint8_t keyValue = 0;
+       char inputValue = 0;
+       int ENCODED_BYTE = 0;
+       
+
+       while(inputFile.read(&inputValue, 1)){
+
+          if(USE_GENERATOR){
+                
+                keyValue = key()%255;
+          }else{
+               // if keyfile reached to end then it need to restart from beginning 
+                if(!(keyFile >> keyValue)){
+                    keyFile.clear();
+                    keyFile.seekg(0);
+                    keyFile >> keyValue;
+                }
+          }
+
+           uint8_t outputValue = (encrypt)?inputValue + keyValue : inputValue - keyValue;
+           outputFile << outputValue;
+           ENCODED_BYTE++;
+
+       }
+    (encrypt)? std::cout <<  "Encrypted: " << std::nline 
+    : std::cout << "Decrypted: "<<std::nline;
+    std::cout << ENCODED_BYTE << " bytes" << std::endl;
+       
+       
+ }
+
 int main(int argc, char* argv[]){
-    
+
        if(argc != 6){
         std::cerr<<"Use: ./EXECUTABLE [type] [encrypt/decrypt] [plain].txt [encrypted].txt key"<<std::nline;
         return EXIT_FAILURE;
@@ -91,7 +147,11 @@ int main(int argc, char* argv[]){
         cipher.Caesor(argv[5][0], inputFile, outputFile, true);
    }else if(ALGORITHM_TYPE == "caesar" && ENCRYPT_OR_DECRYPT == "decrypt"){
         cipher.Caesor(argv[5][0], inputFile, outputFile, false);
-   }else{
+   }else if(ALGORITHM_TYPE =="vigenere" && ENCRYPT_OR_DECRYPT == "encrypt"){
+         cipher.Vigenere(argv[5], inputFile, outputFile, true);
+    }else if(ALGORITHM_TYPE == "vigenere" && ENCRYPT_OR_DECRYPT == "decrypt"){
+           cipher.Vigenere(argv[5], inputFile, outputFile, false);
+    }else{
         std::cerr << "Use: ./EXECUTABLE [type] [encrypt/decrypt] [plain].txt [encrypted].txt key" << std::nline;
    }
 
