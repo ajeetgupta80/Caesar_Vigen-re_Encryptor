@@ -1,5 +1,5 @@
 # Caesar Vigenère Encryptor;
-<p>Simple tool to encrypt/decrypt using ceasar or vigenere encryption</p>
+<p>Simple tool to encrypt/decrypt using ceasar or vigenere encryption algorithms</p>
 
 <h2>Examples</h2>
 Let's say you have a input.txt file that you want to encrypt using the ceasar cipher.
