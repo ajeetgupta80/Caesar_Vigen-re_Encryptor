@@ -1,0 +1,1 @@
+g++ encrypter.cpp -o test
